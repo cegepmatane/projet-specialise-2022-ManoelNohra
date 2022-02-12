@@ -13,5 +13,6 @@ UCLASS()
 class POCGRAPPIN_API APoCGrappinGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
+	virtual void StartPlay() override;
 };

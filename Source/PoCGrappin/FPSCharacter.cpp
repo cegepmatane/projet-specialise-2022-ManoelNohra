@@ -9,6 +9,8 @@ AFPSCharacter::AFPSCharacter()
     // Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
     PrimaryActorTick.bCanEverTick = true;
 
+    AutoPossessPlayer = EAutoReceiveInput::Player0;
+
     FPSCameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("FisrtPersonCamera"));
     check(FPSCameraComp != nullptr);
 
@@ -64,7 +66,7 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
     PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AFPSCharacter::StartJump);
     PlayerInputComponent->BindAction("Jump", IE_Released, this,&AFPSCharacter::StopJump);
 
-
+    PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFPSCharacter::Fire);
 }
 
 void AFPSCharacter::MooveForward(float value)
@@ -85,4 +87,36 @@ void AFPSCharacter::StartJump()
 void AFPSCharacter::StopJump()
 {
     bPressedJump = false;
+}
+void AFPSCharacter::Fire()
+{
+    if (ProjectileClass)
+    {
+        FVector CamLocation;
+        FRotator CamRotation;
+        GetActorEyesViewPoint(CamLocation, CamRotation);
+
+        MuzzleOffset.Set(100.0f, 0.0f, 0.0f);
+
+        FVector MuzzleLocation = CamLocation + FTransform(CamRotation).TransformVector(MuzzleOffset);
+
+        FRotator MuzzleRotation = CamRotation;
+        MuzzleRotation.Pitch += 10.0f;
+
+        UWorld* World = GetWorld();
+        if (World)
+        {
+            FActorSpawnParameters SpawnParams;
+            SpawnParams.Owner = this;
+            SpawnParams.Instigator = GetInstigator();
+
+            AProjectile* Projectile = World->SpawnActor<AProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation, SpawnParams);
+            if (Projectile)
+            {
+                FVector LunchDirection = MuzzleRotation.Vector();
+                Projectile->FireInDirection(LunchDirection);
+            }
+
+        }
+    }
 }

@@ -16,7 +16,7 @@ AProjectile::AProjectile()
 	if (!colComp)
 	{
 		colComp = CreateAbstractDefaultSubobject<USphereComponent>(TEXT("SpehreComponent"));
-		colComp->BodyInstance.SetCollisionProfileName(TEXT("Projectile"));
+
 		colComp->InitSphereRadius(15.0f);
 
 		RootComponent = colComp;
@@ -52,7 +52,6 @@ AProjectile::AProjectile()
 		projMeshComp->SetRelativeScale3D(FVector(0.09f, 0.09f, 0.09f));
 		projMeshComp->SetupAttachment(RootComponent);
 	}
-
 	InitialLifeSpan = 5.0f;
 }
 
@@ -70,18 +69,8 @@ void AProjectile::Tick(float DeltaTime)
 
 }
 
-void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
-{
-	if (OtherActor != this && OtherComponent->IsSimulatingPhysics())
-	{
-		OtherComponent->AddImpulseAtLocation(moveComp->Velocity * 100.0f, Hit.ImpactPoint);
-	}
-
-	Destroy();
-}
-
 void AProjectile::FireInDirection(const FVector& shootDirection)
 {
-	moveComp->Velocity = shootDirection * moveComp->InitialSpeed;
+
 }
 

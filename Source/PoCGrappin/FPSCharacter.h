@@ -8,6 +8,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "Projectile.h"
+#include "Grappin.h"
 #include "FPSCharacter.generated.h"
 
 UCLASS()
@@ -25,6 +26,13 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = Projectile)
         TSubclassOf<class AProjectile> ProjectileClass;
+    UPROPERTY(EditDefaultsOnly, Category = Grappin)
+        TSubclassOf<class AGrappin> GrappinClass;
+
+    UPROPERTY(EditAnywhere)
+        float sprint;
+    UPROPERTY(EditAnywhere)
+        float isGrappling;
 
 public:
     // Called every frame
@@ -32,6 +40,7 @@ public:
 
     // Called to bind functionality to input
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
 
     UFUNCTION()
         void MooveForward(float value);
@@ -42,9 +51,15 @@ public:
     UFUNCTION()
         void StopJump();
     UFUNCTION()
+        void StartSprint();
+    UFUNCTION()
+        void StopSprint();
+    UFUNCTION()
         void Fire();
+    UFUNCTION()
+        void Grappin();
 
-    UPROPERTY(VisibleAnywhere)
+    UPROPERTY(EditAnywhere, Category = Camera)
         UCameraComponent* FPSCameraComp;
 
     UPROPERTY(VisibleDefaultsOnly, Category = Mesh)

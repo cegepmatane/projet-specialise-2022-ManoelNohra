@@ -19,6 +19,8 @@ AProjectile::AProjectile()
 
 		colComp->InitSphereRadius(15.0f);
 
+		colComp->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
+
 		RootComponent = colComp;
 	}
 
@@ -28,9 +30,7 @@ AProjectile::AProjectile()
 		moveComp->SetUpdatedComponent(colComp);
 		moveComp->InitialSpeed = 3000.0f;
 		moveComp->MaxSpeed = 3000.0f;
-		moveComp->bRotationFollowsVelocity = true;
-		moveComp->bShouldBounce = true;
-		moveComp->Bounciness = 0.3f;
+		moveComp->bShouldBounce = false;
 		moveComp->ProjectileGravityScale = 0.0f;
 	}
 
@@ -71,6 +71,16 @@ void AProjectile::Tick(float DeltaTime)
 
 void AProjectile::FireInDirection(const FVector& shootDirection)
 {
+	moveComp->Velocity = shootDirection * moveComp->InitialSpeed;
+}
 
+void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
+{
+	if (OtherActor != this && OtherComponent->IsSimulatingPhysics())
+	{
+		OtherComponent->AddImpulseAtLocation(moveComp->Velocity * 100.0f, Hit.ImpactPoint);
+	}
+
+	Destroy();
 }
 

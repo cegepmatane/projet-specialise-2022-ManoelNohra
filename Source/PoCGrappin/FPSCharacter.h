@@ -8,6 +8,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "Projectile.h"
+#include "Hook.h"
 #include "FPSCharacter.generated.h"
 
 UCLASS()
@@ -25,7 +26,7 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = Projectile)
         TSubclassOf<class AProjectile> ProjectileClass;
-    UPROPERTY(EditDefaultsOnly, Category = Hook)
+    UPROPERTY(EditDefaultsOnly, Category = "Hook")
         TSubclassOf<class AHook> HookClass;
 
 public:
@@ -46,9 +47,7 @@ public:
     UFUNCTION()
         void Fire();
     UFUNCTION()
-        void HookStop();
-    UFUNCTION()
-        void HookStart();
+        void Hook();
 
     UPROPERTY(VisibleAnywhere)
         UCameraComponent* FPSCameraComp;
@@ -58,6 +57,11 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
         FVector MuzzleOffset;
+
+    UPROPERTY(EditAnywhere, Category = Gameplay)
+        FVector HookStartLoc;
+    UPROPERTY(EditAnywhere, Category = Gameplay)
+        FVector HookEndLoc;
 
     UPROPERTY(VisibleAnywhere)
         bool isHooking;

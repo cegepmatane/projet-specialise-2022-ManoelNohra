@@ -2,7 +2,6 @@
 
 
 #include "FPSCharacter.h"
-#include "Hook.h"
 // Sets default values
 AFPSCharacter::AFPSCharacter()
 {
@@ -57,19 +56,19 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-    PlayerInputComponent->BindAxis("MoveX", this, &AFPSCharacter::MooveForward);
-    PlayerInputComponent->BindAxis("MoveY", this, &AFPSCharacter::MooveRight);
+    if (!isHooking)
+    {
 
-    PlayerInputComponent->BindAxis("Turn", this, &AFPSCharacter::AddControllerYawInput);
-    PlayerInputComponent->BindAxis("LookUp", this, &AFPSCharacter::AddControllerPitchInput);
-
-    PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AFPSCharacter::StartJump);
-    PlayerInputComponent->BindAction("Jump", IE_Released, this,&AFPSCharacter::StopJump);
-
-    PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFPSCharacter::Fire);
-
-    PlayerInputComponent->BindAction("Hook", IE_Pressed, this, &AFPSCharacter::HookStart);
-    PlayerInputComponent->BindAction("Hook", IE_Released, this, &AFPSCharacter::HookStop);
+        PlayerInputComponent->BindAxis("MoveX", this, &AFPSCharacter::MooveForward);
+        PlayerInputComponent->BindAxis("MoveY", this, &AFPSCharacter::MooveRight);
+    }
+        PlayerInputComponent->BindAxis("Turn", this, &AFPSCharacter::AddControllerYawInput);
+        PlayerInputComponent->BindAxis("LookUp", this, &AFPSCharacter::AddControllerPitchInput);
+        PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AFPSCharacter::StartJump);
+        PlayerInputComponent->BindAction("Jump", IE_Released, this, &AFPSCharacter::StopJump);
+        PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFPSCharacter::Fire);
+        PlayerInputComponent->BindAction("Hook", IE_Pressed, this, &AFPSCharacter::Hook);
+        PlayerInputComponent->BindAction("Hook", IE_Released, this, &AFPSCharacter::Hook);
 
 }
 
@@ -113,21 +112,24 @@ void AFPSCharacter::Fire()
             FActorSpawnParameters SpawnParams;
             SpawnParams.Owner = this;
             SpawnParams.Instigator = GetInstigator();
-
             AProjectile* Projectile = World->SpawnActor<AProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation, SpawnParams);
+            HookStartLoc = Projectile->GetActorLocation();
             if (Projectile)
             {
                 FVector LunchDirection = MuzzleRotation.Vector();
                 Projectile->FireInDirection(LunchDirection);
             }
+                HookEndLoc = Projectile->GetActorLocation();
+                SetActorLocation(ClampVector(HookStartLoc, HookEndLoc, GetActorLocation() - HookEndLoc));
+
 
         }
     }
 }
 
-void AFPSCharacter::HookStart()
+void AFPSCharacter::Hook()
 {
-    if (!isHooking)
+    if (!isHooking && HookClass)
     {
         FVector CamLocation;
         FRotator CamRotation;
@@ -140,17 +142,25 @@ void AFPSCharacter::HookStart()
         FVector MuzzleLocation = CamLocation + FTransform(CamRotation).TransformVector(MuzzleOffset);
         CamRotation.Yaw -= 90.0f;
         FActorSpawnParameters SpawnParameters;
+        SpawnParameters.Owner = this;
+        SpawnParameters.Instigator = GetInstigator();
         UWorld* World = GetWorld();
-        FVector LunchDirection = MuzzleRotation.Vector();
 
         AHook* hook = World->SpawnActor<AHook>(HookClass, MuzzleLocation, MuzzleRotation, SpawnParameters);
-        isHooking = true;
-        SetActorLocation(MuzzleLocation + LunchDirection * hook->GetActorRelativeScale3D());
-    }
-    isHooking = false;
-}
+        HookStartLoc = hook->GetActorLocation();
+        if (hook)
+        {
+            FVector direction = MuzzleRotation.Vector();
+            hook->FireInDirection(direction);
+        }
 
-void AFPSCharacter::HookStop()
-{
-    isHooking = false;
+
+
+        isHooking = true;
+
+    }
+    else
+    {
+        isHooking = false;
+    }
 }

@@ -26,11 +26,29 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(EditAnywhere)
-		UStaticMeshComponent* PersoMesh;
-	UPROPERTY(EditAnywhere)
-		class UCameraComponent* PersoCam;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+		class USkeletalMeshComponent* HandsMesh;
+	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+		class USkeletalMeshComponent* GunMesh;
+	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+		class USceneComponent* MuzzleLocation;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+		class UCameraComponent* FirstPersonCamera;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+		float TurnRate;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+		float LookUpRate;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Gameplay)
+		FVector GunOffset;
+
+protected:
+	void OnFire();
+
+	void MoveForward(float Value);
+	void MoveRight(float Value);
+
+	void TurnAtRate(float Rate);
+	void LookUpAtRate(float Rate);
 
 
 };

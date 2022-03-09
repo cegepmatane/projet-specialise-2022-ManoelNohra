@@ -6,6 +6,12 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
+#include "Projectile.h"
+#include "Animation/AnimInstance.h"
+#include "Kismet/GameplayStatics.h"
+#include "PrototypeGameModeBase.h"
+
+
 
 
 // Sets default values
@@ -16,6 +22,10 @@ APerso::APerso()
 
 	GetCapsuleComponent()->InitCapsuleSize(40.f, 95.f);
 
+	JumpCount = 0;
+	Jumping = false;
+	walking = true;
+	speed = 0.5f;
 	TurnRate = 45.f;
 	LookUpRate = 45.f;
 
@@ -47,12 +57,19 @@ void APerso::BeginPlay()
 {
 	Super::BeginPlay();
 	GunMesh->AttachToComponent(HandsMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("GripPoint"));
+
+	World = GetWorld();
 }
 
 // Called every frame
 void APerso::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (Jumping)
+	{
+		Jump();
+	}
 
 }
 
@@ -61,8 +78,8 @@ void APerso::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &APerso::CheckJump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &APerso::CheckJump);
 
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &APerso::OnFire);
 
@@ -72,17 +89,45 @@ void APerso::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAxis("Turn", this, &APerso::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APerso::LookUpAtRate);
 
+	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &APerso::Sprint);
+	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &APerso::Sprint);
+
 }
+
 
 void APerso::OnFire()
 {
+	if (World != NULL)
+	{
+		SpawnRotation = GetControlRotation();
+
+		SpawnLocation = ((MuzzleLocation != nullptr) ? 
+			MuzzleLocation->GetComponentLocation() : 
+			GetActorLocation()) + SpawnRotation.RotateVector(GunOffset);
+		FActorSpawnParameters ActorSpawnParams;
+		ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+		World->SpawnActor<AProjectile>(Projectile, SpawnLocation, SpawnRotation, ActorSpawnParams);
+
+		if(FireSound != NULL)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
+		}
+		
+		
+	}
+}
+
+void APerso::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+	JumpCount = 0;
 }
 
 void APerso::MoveForward(float Value)
 {
 	if (Value != 0.0f)
 	{
-		AddMovementInput(GetActorForwardVector(), Value);
+		AddMovementInput(GetActorForwardVector(), Value * speed);
 	}
 }
 
@@ -90,7 +135,7 @@ void APerso::MoveRight(float Value)
 {
 	if (Value != 0.0f)
 	{
-		AddMovementInput(GetActorRightVector(), Value);
+		AddMovementInput(GetActorRightVector(), Value * speed);
 	}
 }
 
@@ -102,5 +147,35 @@ void APerso::TurnAtRate(float Rate)
 void APerso::LookUpAtRate(float Rate)
 {
 	AddControllerPitchInput(Rate * LookUpRate * GetWorld()->GetDeltaSeconds());
+}
+
+void APerso::CheckJump()
+{
+	if (Jumping)
+	{
+		Jumping = false;
+	}
+	else
+	{
+		Jumping = true;
+		JumpCount++;
+		if (JumpCount == 2)
+		{
+			LaunchCharacter(FVector(0.f, 0.f, 750.f), false, true); 
+		}
+	}
+}
+
+void APerso::Sprint()
+{
+	walking = !walking;
+	if (walking)
+	{
+		speed = 0.5f;
+	}
+	else
+	{
+		speed = 1.0f;
+	}
 }
 

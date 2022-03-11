@@ -21,11 +21,14 @@ APerso::APerso()
 	PrimaryActorTick.bCanEverTick = true;
 
 	GetCapsuleComponent()->InitCapsuleSize(40.f, 95.f);
-
 	JumpCount = 0;
 	Jumping = false;
+	canShoot = false;
+	canDoubleJump = false;
+	canSprint = false;
+	canHook = false;
 	walking = true;
-	speed = 0.5f;
+	speed = 0.7f;
 	TurnRate = 45.f;
 	LookUpRate = 45.f;
 
@@ -70,7 +73,6 @@ void APerso::Tick(float DeltaTime)
 	{
 		Jump();
 	}
-
 }
 
 // Called to bind functionality to input
@@ -90,7 +92,6 @@ void APerso::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAxis("LookUp", this, &APerso::LookUpAtRate);
 
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &APerso::Sprint);
-	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &APerso::Sprint);
 
 }
 
@@ -128,6 +129,11 @@ void APerso::MoveForward(float Value)
 	if (Value != 0.0f)
 	{
 		AddMovementInput(GetActorForwardVector(), Value * speed);
+	}
+	if (Value <= 0.0f)
+	{
+		walking = true;
+		speed = 0.7f;
 	}
 }
 
@@ -171,11 +177,30 @@ void APerso::Sprint()
 	walking = !walking;
 	if (walking)
 	{
-		speed = 0.5f;
+		speed = 0.7f;
 	}
 	else
 	{
-		speed = 1.0f;
+		speed = 1.5f;
 	}
 }
 
+void APerso::CanHook(bool change)
+{
+	canHook = change;
+}
+
+void APerso::CanSprint(bool change)
+{
+	canSprint = change;
+}
+
+void APerso::CanDoubleJump(bool change)
+{
+	canDoubleJump = change;
+}
+
+void APerso::CanShoot(bool change)
+{
+	canShoot = change;
+}

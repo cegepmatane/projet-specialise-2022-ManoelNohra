@@ -58,6 +58,11 @@ protected:
 
 	void Sprint();
 
+	void CanHook(bool change);
+	void CanSprint(bool change);
+	void CanDoubleJump(bool change);
+	void CanShoot(bool change);
+
 
 public: 
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
@@ -82,5 +87,12 @@ public:
 		float speed;
 	UPROPERTY()
 		bool walking;
-
+	UPROPERTY()
+		bool canShoot;
+	UPROPERTY()
+		bool canSprint;
+	UPROPERTY()
+		bool canHook;
+	UPROPERTY()
+		bool canDoubleJump;
 };

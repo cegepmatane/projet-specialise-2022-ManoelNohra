@@ -28,6 +28,8 @@ public:
 
 	virtual void Landed(const FHitResult& Hit) override;
 
+	virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
+
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 		class USkeletalMeshComponent* HandsMesh;
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
@@ -62,11 +64,17 @@ protected:
 	void CanSprint(bool change);
 	void CanDoubleJump(bool change);
 	void CanShoot(bool change);
+	void CanSlide(bool change);
+
+	void Slide();
+	void Hook();
 
 
 public: 
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 		TSubclassOf<class AProjectile> Projectile;
+	UPROPERTY(EditDefaultsOnly, Category = Projectile)
+		TSubclassOf<class AHook> hook;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 		class USoundBase* FireSound;
@@ -80,11 +88,12 @@ public:
 
 	FRotator SpawnRotation;
 	FVector SpawnLocation;
-
 	bool Jumping;
 
 	UPROPERTY()
 		float speed;
+	UPROPERTY()
+		bool isHooking;
 	UPROPERTY()
 		bool walking;
 	UPROPERTY()
@@ -95,4 +104,22 @@ public:
 		bool canHook;
 	UPROPERTY()
 		bool canDoubleJump;
+	UPROPERTY()
+		bool isSliding;
+	UPROPERTY()
+		bool canSlide;
+	UPROPERTY()
+		FVector HookSpawnLocation;
+	UPROPERTY()
+		FVector HookEndLocation;
+	UPROPERTY()
+		bool hookStart;
+
+	float TimeElapsed = 0;
+	class AHook* h;
+	float Wait = 2;
+
+	UFUNCTION()
+		void StartHooking(FVector ImpactPoint);
+
 };

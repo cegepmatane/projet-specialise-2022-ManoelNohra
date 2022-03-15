@@ -7,6 +7,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "Projectile.h"
+#include "Hook.h"
 #include "Animation/AnimInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "PrototypeGameModeBase.h"
@@ -21,24 +22,29 @@ APerso::APerso()
 	PrimaryActorTick.bCanEverTick = true;
 
 	GetCapsuleComponent()->InitCapsuleSize(40.f, 95.f);
+
 	JumpCount = 0;
 	Jumping = false;
 	canShoot = false;
 	canDoubleJump = false;
 	canSprint = false;
 	canHook = false;
+	canSlide = false;
 	walking = true;
+	isSliding = false;
+	isHooking = false;
+	hookStart = false;
+	h = nullptr;
+	
 	speed = 0.7f;
 	TurnRate = 45.f;
 	LookUpRate = 45.f;
-
 	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FisrtPersonCamera"));
 	FirstPersonCamera->SetupAttachment(GetCapsuleComponent());
 	FirstPersonCamera->AddRelativeLocation(FVector(-35.65f, 1.75f, 64.0f));
 	FirstPersonCamera->bUsePawnControlRotation = true;
 
 	HandsMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Character Mesh"));
-
 	HandsMesh->SetOnlyOwnerSee(true);
 	HandsMesh->SetupAttachment(FirstPersonCamera);
 	HandsMesh->bCastDynamicShadow = false;
@@ -48,7 +54,7 @@ APerso::APerso()
 	GunMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Gun Mesh"));
 	GunMesh->SetOnlyOwnerSee(true);
 
-	MuzzleLocation = CreateAbstractDefaultSubobject<USceneComponent>(TEXT("Muzzle Location"));
+	MuzzleLocation = CreateDefaultSubobject<USceneComponent>(TEXT("Muzzle Location"));
 	MuzzleLocation->SetupAttachment(GunMesh);
 	MuzzleLocation->SetRelativeLocation(FVector(0.2f, 48.4f, -10.6f));
 
@@ -60,7 +66,6 @@ void APerso::BeginPlay()
 {
 	Super::BeginPlay();
 	GunMesh->AttachToComponent(HandsMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("GripPoint"));
-
 	World = GetWorld();
 }
 
@@ -68,11 +73,28 @@ void APerso::BeginPlay()
 void APerso::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	if (GetActorLocation().Z < -10)
+	{
+		SetActorLocation(SpawnPoint);
+	}
 
 	if (Jumping)
 	{
 		Jump();
 	}
+	
+	if (hookStart && TimeElapsed < 5)
+	{
+		SetActorLocation(FMath::Lerp(HookSpawnLocation, HookEndLocation, TimeElapsed / 5));
+		TimeElapsed += DeltaTime;
+	}
+	if (TimeElapsed == 5)
+	{
+		hookStart = false;
+		TimeElapsed = 0;
+	}
+	
 }
 
 // Called to bind functionality to input
@@ -93,6 +115,11 @@ void APerso::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &APerso::Sprint);
 
+	PlayerInputComponent->BindAction("Slide", IE_Pressed, this, &APerso::Slide);
+	PlayerInputComponent->BindAction("Slide", IE_Released, this, &APerso::Slide);
+
+	PlayerInputComponent->BindAction("Hook", IE_Pressed, this, &APerso::Hook);
+	
 }
 
 
@@ -185,6 +212,67 @@ void APerso::Sprint()
 	}
 }
 
+void APerso::OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
+{
+	Super::OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
+
+	if (GetVelocity() != FVector(0, 0, 0))
+	{
+		GetCapsuleComponent()->AddForce(GetVelocity() * GetCapsuleComponent()->GetMass());
+	}
+}
+void APerso::Slide()
+{
+	if (!isSliding)
+	{
+		isSliding = true;
+		OnStartCrouch( GetSimpleCollisionHalfHeight() - GetCapsuleComponent()->GetScaledCapsuleHalfHeight(), GetDefaultHalfHeight());
+	}
+	else
+	{
+		isSliding = false;
+	}
+}
+
+void APerso::Hook()
+{
+	if (h != nullptr)
+	{
+		h->Destroy();
+	}
+	if (World != NULL && !isHooking)
+	{
+		SpawnRotation = GetControlRotation();
+
+		SpawnLocation = ((MuzzleLocation != nullptr) ?
+			MuzzleLocation->GetComponentLocation() :
+			GetActorLocation()) + SpawnRotation.RotateVector(GunOffset);
+		FActorSpawnParameters ActorSpawnParams;
+		ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+		h = World->SpawnActor<AHook>(hook, SpawnLocation, SpawnRotation, ActorSpawnParams);
+		
+	}
+	else
+	{
+		if (&h != NULL)
+		{
+			h->Destroy();
+		}
+		isHooking = false;
+	}
+}
+
+void APerso::StartHooking(FVector ImpactPoint)
+{
+	HookEndLocation = ImpactPoint;
+	hookStart = true;
+}
+
+void APerso::ChangeSpawnPoint(FVector NewSpawnPoint)
+{
+}
+
+
 void APerso::CanHook(bool change)
 {
 	canHook = change;
@@ -203,4 +291,9 @@ void APerso::CanDoubleJump(bool change)
 void APerso::CanShoot(bool change)
 {
 	canShoot = change;
+}
+
+void APerso::CanSlide(bool change)
+{
+	canSlide = change;
 }

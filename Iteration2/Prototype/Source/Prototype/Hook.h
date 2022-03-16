@@ -29,8 +29,6 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
 		class UProjectileMovementComponent* ProjectileMovement;
 
-	UPROPERTY(EditDefaultsOnly, Category = Player)
-		TSubclassOf<class APerso> perso;
 	UFUNCTION()
 		void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& Hit);
 };

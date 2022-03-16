@@ -35,7 +35,7 @@ APerso::APerso()
 	isHooking = false;
 	hookStart = false;
 	h = nullptr;
-	
+
 	speed = 0.7f;
 	TurnRate = 45.f;
 	LookUpRate = 45.f;
@@ -74,11 +74,6 @@ void APerso::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	if (GetActorLocation().Z < -10)
-	{
-		SetActorLocation(SpawnPoint);
-	}
-
 	if (Jumping)
 	{
 		Jump();
@@ -140,8 +135,6 @@ void APerso::OnFire()
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 		}
-		
-		
 	}
 }
 
@@ -162,6 +155,7 @@ void APerso::MoveForward(float Value)
 		walking = true;
 		speed = 0.7f;
 	}
+
 }
 
 void APerso::MoveRight(float Value)
@@ -170,6 +164,7 @@ void APerso::MoveRight(float Value)
 	{
 		AddMovementInput(GetActorRightVector(), Value * speed);
 	}
+	
 }
 
 void APerso::TurnAtRate(float Rate)
@@ -266,10 +261,6 @@ void APerso::StartHooking(FVector ImpactPoint)
 {
 	HookEndLocation = ImpactPoint;
 	hookStart = true;
-}
-
-void APerso::ChangeSpawnPoint(FVector NewSpawnPoint)
-{
 }
 
 

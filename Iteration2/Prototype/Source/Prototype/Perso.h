@@ -60,11 +60,7 @@ protected:
 
 	void Sprint();
 
-	void CanHook(bool change);
-	void CanSprint(bool change);
-	void CanDoubleJump(bool change);
-	void CanShoot(bool change);
-	void CanSlide(bool change);
+	
 
 	void Slide();
 	void Hook();
@@ -82,44 +78,36 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 		class UAnimMontage* FireAnimation;
 
-	class UAnimeInstance* AnimInstance;
 	
-	class UWorld* World;
 
-	FRotator SpawnRotation;
-	FVector SpawnLocation;
-	bool Jumping;
-
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float speed;
-	UPROPERTY()
 		bool isHooking;
-	UPROPERTY()
 		bool walking;
-	UPROPERTY()
 		bool canShoot;
-	UPROPERTY()
 		bool canSprint;
-	UPROPERTY()
 		bool canHook;
-	UPROPERTY()
 		bool canDoubleJump;
-	UPROPERTY()
 		bool isSliding;
-	UPROPERTY()
 		bool canSlide;
-	UPROPERTY()
 		FVector HookSpawnLocation;
-	UPROPERTY()
 		FVector HookEndLocation;
-	UPROPERTY()
 		bool hookStart;
-
-	float TimeElapsed = 0;
-	class AHook* h;
-	float Wait = 2;
+		float TimeElapsed = 0;
+		class AHook* h;
+		float Wait = 2;
+		class UAnimeInstance* AnimInstance;
+		class UWorld* World;
+		FRotator SpawnRotation;
+		FVector SpawnLocation;
+		bool Jumping;
 
 	UFUNCTION()
 		void StartHooking(FVector ImpactPoint);
+		void CanHook(bool change);
+		void CanSprint(bool change);
+		void CanDoubleJump(bool change);
+		void CanShoot(bool change);
+		void CanSlide(bool change);
 
 };

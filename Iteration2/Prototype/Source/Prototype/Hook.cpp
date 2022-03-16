@@ -44,5 +44,9 @@ void AHook::Tick(float DeltaTime)
 
 void AHook::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& Hit)
 {
-
+	APerso* perso = Cast<APerso>(HitComp);
+	if (perso)
+	{
+		perso->StartHooking(this->GetActorLocation());
+	}
 }

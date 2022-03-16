@@ -12,7 +12,7 @@ AProjectile::AProjectile()
 	PrimaryActorTick.bCanEverTick = true;
 
 	CollisionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Spehere Collision"));
-	CollisionSphere->InitSphereRadius(20.0f);
+	CollisionSphere->InitSphereRadius(15.0f);
 
 	RootComponent = CollisionSphere;
 

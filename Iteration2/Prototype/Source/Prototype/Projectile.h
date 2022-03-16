@@ -24,10 +24,10 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 
-	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Projectile)
 		class USphereComponent* CollisionSphere;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Movement)
 		class UProjectileMovementComponent* ProjectileMovement;
 	UFUNCTION()
 		void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& Hit);

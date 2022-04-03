@@ -25,6 +25,7 @@ AHook::AHook()
 	ProjectileMovement->bShouldBounce = false;
 
 	InitialLifeSpan = 5.0f;
+	CollisionSphere->OnComponentBeginOverlap.AddDynamic(this, &AHook::OnHit);
 }
 
 // Called when the game starts or when spawned
@@ -32,7 +33,6 @@ void AHook::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CollisionSphere->OnComponentBeginOverlap.AddDynamic(this, &AHook::OnHit);
 }
 
 // Called every frame
@@ -44,9 +44,5 @@ void AHook::Tick(float DeltaTime)
 
 void AHook::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& Hit)
 {
-	APerso* perso = Cast<APerso>(HitComp);
-	if (perso)
-	{
-		perso->StartHooking(this->GetActorLocation());
-	}
+	
 }

@@ -80,8 +80,9 @@ public:
 
 	
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 		float speed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 		bool isHooking;
 		bool walking;
 		bool canShoot;
@@ -90,12 +91,11 @@ public:
 		bool canDoubleJump;
 		bool isSliding;
 		bool canSlide;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 		FVector HookSpawnLocation;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 		FVector HookEndLocation;
-		bool hookStart;
-		float TimeElapsed = 0;
 		class AHook* h;
-		float Wait = 2;
 		class UAnimeInstance* AnimInstance;
 		class UWorld* World;
 		FRotator SpawnRotation;
@@ -103,7 +103,6 @@ public:
 		bool Jumping;
 
 	UFUNCTION()
-		void StartHooking(FVector ImpactPoint);
 		void CanHook(bool change);
 		void CanSprint(bool change);
 		void CanDoubleJump(bool change);

@@ -33,7 +33,6 @@ APerso::APerso()
 	walking = true;
 	isSliding = false;
 	isHooking = false;
-	hookStart = false;
 	h = nullptr;
 
 	speed = 0.7f;
@@ -77,17 +76,6 @@ void APerso::Tick(float DeltaTime)
 	if (Jumping)
 	{
 		Jump();
-	}
-	
-	if (hookStart && TimeElapsed < 5)
-	{
-		SetActorLocation(FMath::Lerp(HookSpawnLocation, HookEndLocation, TimeElapsed / 5));
-		TimeElapsed += DeltaTime;
-	}
-	if (TimeElapsed == 5)
-	{
-		hookStart = false;
-		TimeElapsed = 0;
 	}
 	
 }
@@ -245,7 +233,7 @@ void APerso::Hook()
 		FActorSpawnParameters ActorSpawnParams;
 		ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
 		h = World->SpawnActor<AHook>(hook, SpawnLocation, SpawnRotation, ActorSpawnParams);
-		
+		isHooking = true;
 	}
 	else
 	{
@@ -255,12 +243,6 @@ void APerso::Hook()
 		}
 		isHooking = false;
 	}
-}
-
-void APerso::StartHooking(FVector ImpactPoint)
-{
-	HookEndLocation = ImpactPoint;
-	hookStart = true;
 }
 
 

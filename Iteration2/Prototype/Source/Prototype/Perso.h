@@ -28,7 +28,6 @@ public:
 
 	virtual void Landed(const FHitResult& Hit) override;
 
-	virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 		class USkeletalMeshComponent* HandsMesh;
@@ -60,9 +59,6 @@ protected:
 
 	void Sprint();
 
-	
-
-	void Slide();
 	void Hook();
 
 
@@ -100,6 +96,7 @@ public:
 		class UWorld* World;
 		FRotator SpawnRotation;
 		FVector SpawnLocation;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 		bool Jumping;
 
 	UFUNCTION()

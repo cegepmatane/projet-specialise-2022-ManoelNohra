@@ -77,6 +77,7 @@ void APerso::Tick(float DeltaTime)
 	{
 		Jump();
 	}
+
 	
 }
 
@@ -97,9 +98,6 @@ void APerso::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAxis("LookUp", this, &APerso::LookUpAtRate);
 
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &APerso::Sprint);
-
-	PlayerInputComponent->BindAction("Slide", IE_Pressed, this, &APerso::Slide);
-	PlayerInputComponent->BindAction("Slide", IE_Released, this, &APerso::Slide);
 
 	PlayerInputComponent->BindAction("Hook", IE_Pressed, this, &APerso::Hook);
 	
@@ -192,28 +190,6 @@ void APerso::Sprint()
 	else
 	{
 		speed = 1.5f;
-	}
-}
-
-void APerso::OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
-{
-	Super::OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
-
-	if (GetVelocity() != FVector(0, 0, 0))
-	{
-		GetCapsuleComponent()->AddForce(GetVelocity() * GetCapsuleComponent()->GetMass());
-	}
-}
-void APerso::Slide()
-{
-	if (!isSliding)
-	{
-		isSliding = true;
-		OnStartCrouch( GetSimpleCollisionHalfHeight() - GetCapsuleComponent()->GetScaledCapsuleHalfHeight(), GetDefaultHalfHeight());
-	}
-	else
-	{
-		isSliding = false;
 	}
 }
 
